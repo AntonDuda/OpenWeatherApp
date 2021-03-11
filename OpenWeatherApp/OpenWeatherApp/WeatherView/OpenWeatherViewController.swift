@@ -20,9 +20,12 @@ class OpenWeatherViewController: UIViewController, CLLocationManagerDelegate, UI
     
     var weather: [List] = []
     
-    let apiManager = APIManager()
     var locationManager: CLLocationManager!
     var kelvin = 273.15
+    
+    private var network = Weather.shared.network
+    private static let countOfDays = 16
+    private static let apiKey = "e59abf156fb4a7bc7f0258d2f4d7041d"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,22 +49,22 @@ class OpenWeatherViewController: UIViewController, CLLocationManagerDelegate, UI
         }
     }
 
-     private func getData(location: CLLocationCoordinate2D) {
-
-        apiManager.fetchWeather(for: Coordinates(latitude: location.latitude, longitude: location.longitude)) { [weak self] (responce) -> Void in
-            guard let sself = self else { return }
-                sself.weather = responce!.list
-                sself.labelCity.text = responce?.city.name
-                sself.labelInformation.text = responce?.city.country
-            self!.labelTemp.text = String(Int((self!.weather.first?.temp.day)! - self!.kelvin))
-            self!.labelMaxDayTemp.text = String(Int((self!.weather.first?.temp.max)! - self!.kelvin))
-            self!.labelMinNightTemp.text = String(Int((self!.weather.first?.temp.min)! - self!.kelvin))
-            
-            DispatchQueue.main.async {
-                sself.tableView.reloadData()
-            }
-        }
-    }
+//     private func getData(location: CLLocationCoordinate2D) {
+//
+//        apiManager.fetchWeather(for: Coordinates(latitude: location.latitude, longitude: location.longitude)) { [weak self] (responce) -> Void in
+//            guard let sself = self else { return }
+//                sself.weather = responce!.list
+//                sself.labelCity.text = responce?.city.name
+//                sself.labelInformation.text = responce?.city.country
+//            self!.labelTemp.text = String(Int((self!.weather.first?.temp.day)! - self!.kelvin))
+//            self!.labelMaxDayTemp.text = String(Int((self!.weather.first?.temp.max)! - self!.kelvin))
+//            self!.labelMinNightTemp.text = String(Int((self!.weather.first?.temp.min)! - self!.kelvin))
+//
+//            DispatchQueue.main.async {
+//                sself.tableView.reloadData()
+//            }
+//        }
+//    }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations   locations: [CLLocation]) {
         let userLocation :CLLocation = locations[0] as CLLocation
@@ -81,7 +84,10 @@ class OpenWeatherViewController: UIViewController, CLLocationManagerDelegate, UI
             }
         }
         locationManager.stopUpdatingLocation()
-        getData(location: CLLocationCoordinate2DMake(userLocation.coordinate.latitude, userLocation.coordinate.longitude))
+        network.fetchWeather(longitude: userLocation.coordinate.longitude,
+                             latitude: userLocation.coordinate.latitude,
+                             countOfDays: OpenWeatherViewController.countOfDays,
+                             apiKey: OpenWeatherViewController.apiKey)
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

@@ -1,8 +1,14 @@
 # platform :ios, '9.0'
 
 # ignore all warnings from all pods
-inhibit_all_warnings!
+
+  inhibit_all_warnings!
 
 target 'OpenWeatherApp' do
-  pod 'Alamofire', '~> 5.2'
+
+  use_frameworks!
+
+  pod 'Moya'
+  pod 'PromiseKit'
+	
 end
